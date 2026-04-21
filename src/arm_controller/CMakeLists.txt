@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.22)
 project(arm_controller)
-
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
@@ -27,6 +26,8 @@ find_package(geometry_msgs REQUIRED)
 
 install(PROGRAMS
         src/arm_controller_node.py
+        src/arm_control.py
+        src/arm_controller_input.py
         src/PCA9685.py
         DESTINATION lib/${PROJECT_NAME})
 

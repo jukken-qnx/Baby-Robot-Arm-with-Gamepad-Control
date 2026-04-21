@@ -112,8 +112,8 @@ int prs_v046d_pc21d(int mode, int data_len, uint8_t *data) {
             button |= (SCREEN_DPAD_RIGHT_GAME_BUTTON * ((data[2] & 0x08) ? 1 : 0));
             button |= (SCREEN_MENU2_GAME_BUTTON * ((data[2] & 0x10) ? 1 : 0)); // START button
             button |= (SCREEN_MENU1_GAME_BUTTON * ((data[2] & 0x20) ? 1 : 0)); // BACK button
-            button |= (SCREEN_L3_GAME_BUTTON * ((data[2] & 0x40) ? 1 : 0)); // Left stick click
-            button |= (SCREEN_R3_GAME_BUTTON * ((data[2] & 0x80) ? 1 : 0)); // Right stick click
+            button |= (SCREEN_R3_GAME_BUTTON * ((data[2] & 0x40) ? 1 : 0)); // Right stick click
+            button |= (SCREEN_L3_GAME_BUTTON * ((data[2] & 0x80) ? 1 : 0)); // Left stick click
             button |= (SCREEN_L1_GAME_BUTTON * ((data[3] & 0x01) ? 1 : 0)); // LB
             button |= (SCREEN_R1_GAME_BUTTON * ((data[3] & 0x02) ? 1 : 0)); // RB
             button |= (SCREEN_A_GAME_BUTTON * ((data[3] & 0x10) ? 1 : 0));

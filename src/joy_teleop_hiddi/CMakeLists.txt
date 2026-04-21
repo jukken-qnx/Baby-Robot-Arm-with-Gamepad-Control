@@ -30,7 +30,6 @@ add_executable(joy_teleop_node
 # Link against the QNX HIDDI library
 target_link_libraries(joy_teleop_node
   hiddi
-  spdlog
 )
  
 ament_target_dependencies(joy_teleop_node

@@ -41,10 +41,6 @@ target_include_directories(ik_solver_node PUBLIC
   $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(ik_solver_node
-  spdlog
-)
-
 ament_target_dependencies(ik_solver_node
   "rclcpp"
   "sensor_msgs"

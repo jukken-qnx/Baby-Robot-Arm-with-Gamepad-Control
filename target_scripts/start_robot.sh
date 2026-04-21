@@ -2,23 +2,23 @@
  
 # --- Set Environment Variables ---
 # These paths are needed for ROS2 to find its libraries and Python packages.
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/home/qnxuser/opt/ros/humble/lib"
-export URDF_PATH="$URDF_PATH/data/home/qnxuser/opt/ros/nodes/share/ik_solver/config"
-export PYTHONPATH="$PYTHONPATH:/data/home/qnxuser/opt/ros/humble/usr/lib/python3.11/site-packages/:/data/home/qnxuser/.local/lib/python3.11/site-packages/"
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/ros/jazzy/lib"
+export URDF_PATH="$URDF_PATH/data/home/qnxuser/src/install/share/ik_solver/config"
+export PYTHONPATH="$PYTHONPATH:/opt/ros/jazzy/usr/lib/python3.11/site-packages/:/data/home/qnxuser/.local/lib/python3.11/site-packages/"
 export COLCON_PYTHON_EXECUTABLE=/system/bin/python3
  
 # --- Sourcing ROS2 ---
 # Source the main ROS2 environment
-if [ -f /data/home/qnxuser/opt/ros/humble/setup.bash ]; then
-    . /data/home/qnxuser/opt/ros/humble/setup.bash
+if [ -f /opt/ros/jazzy/setup.bash ]; then
+    . /opt/ros/jazzy/setup.bash
 else
     echo "Error: ROS2 global setup file not found!"
     exit 1
 fi
  
 # Source your workspace's local setup file to find your custom nodes
-if [ -f /data/home/qnxuser/opt/ros/nodes/local_setup.bash ]; then
-    . /data/home/qnxuser/opt/ros/nodes/local_setup.bash
+if [ -f /data/home/qnxuser/src/install/local_setup.bash ]; then
+    . /data/home/qnxuser/src/install/local_setup.bash
 fi
  
 # =========================================================================
