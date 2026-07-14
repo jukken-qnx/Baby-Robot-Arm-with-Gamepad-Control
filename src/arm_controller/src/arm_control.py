@@ -99,7 +99,6 @@ class Joint:
         """
         Updates the Joint one tick and returns the new result
         """
-        self.target = max(self.min_pos, min(self.max_pos, self.target))
         error = self.target - self.current
         self.current += error * self.SMOOTHING_FACTOR
         return self.current
@@ -149,6 +148,9 @@ class ArmController:
 
         self.servos_are_released = False
         self.last_input_time = time.time()
+
+        # If min and max limits for servo positions is enabled.
+        self._limits_enabled = True
 
         try:
             self.pwm = PCA9685()
@@ -215,8 +217,11 @@ class ArmController:
         self.last_input_time = time.time()
         self.servos_are_released = False
 
-        # Clamp the result to the servo max and min
-        joint.target = min(max(abs_pos, joint.min_pos), joint.max_pos)
+        # Clamp the result to the servo max and min only if limits are enabled
+        if (self._limits_enabled):
+                abs_pos = min(max(abs_pos, joint.min_pos), joint.max_pos)
+
+        joint.target = abs_pos
         return joint.target
 
     def set_joint_rad(self, joint_num: JointNum, rad: float) -> float:
@@ -287,6 +292,14 @@ class ArmController:
             if math.fabs(joint.current - joint.center) > joint.SMOOTHING_FACTOR:
                 return False
         return True
+
+    def enable_position_limits(self, enabled: bool) -> None:
+        """
+        @brief Sets if the servo should use self.min_pos and self.max_pos
+
+        @param enabled If the position limits should be respected.
+        """
+        self._limits_enabled = enabled
 
     def get_logger(self) -> RcutilsLogger:
         return self._logger

@@ -186,6 +186,10 @@ class ArmControllerNode(Node):
         self.screensaver_enabled = False
         self.control_mode = mode
 
+        # By default we should have position limits on the robot arm where we only remove them
+        # in cases that the mode will provide it's own limits in a solver
+        self.controller.enable_position_limits(True)
+
         # Update the control mode to the right handler
         match (self.control_mode):
             case ArmControlMode.JOYSTICK:
@@ -194,6 +198,7 @@ class ArmControllerNode(Node):
                 self.active_input = self.input_joint
             case ArmControlMode.IK:
                 self.active_input = self.input_ik
+                self.controller.enable_position_limits(False)
 
         msg = String()
         msg.data = mode.name.lower()
@@ -293,7 +298,7 @@ class ArmControllerNode(Node):
             return
 
         self.active_input.joint_callback(msg)
-    
+
     def mov_callback(self, msg: JointState):
         """
         Handles Joint information callbacks for IK. This is only enabled if the mode
