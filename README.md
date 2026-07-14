@@ -1,6 +1,6 @@
 # Robot Arm with Gamepad Control for QNX
 
-This repository provides a complete ROS2 project for controlling a 6-DOF robotic arm using a standard gamepad controller on the QNX SDP 8.0. The project is designed to run on a Raspberry Pi 4B or Pi 5 and demonstrates real-time, intuitive control over the arm's movements.
+This repository provides a complete ROS2 project for controlling a 5-DOF robotic arm using a standard gamepad controller on the QNX SDP 8.0. The project is designed to run on a Raspberry Pi 4B or Pi 5 and demonstrates real-time, intuitive control over the arm's movements.
 
 ![Picture of the Robotic Arm with ping pong balls.](./docs/QNX-Robot-Arm-at-CES.jpeg)
 
@@ -25,7 +25,6 @@ The project uses the [Arduino-based Robot Arm Model](https://cults3d.com/en/3d-m
     - [3. Servo Control Wiring (Servos to PCA9685)](#3-servo-control-wiring-servos-to-pca9685)
   - [Software Requirements](#software-requirements)
   - [How to Build](#how-to-build)
-  - [How to Transfer](#how-to-transfer)
   - [How to Run the Demo](#how-to-run-the-demo)
   - [Configuration \& Tuning](#configuration--tuning)
     - [Manual Calibration](#manual-calibration)
@@ -45,7 +44,7 @@ The project uses the [Arduino-based Robot Arm Model](https://cults3d.com/en/3d-m
 
 ## Overview
 
-This project provides a demo for teleoperating a 6-DOF robotic arm. It consists of two primary ROS2 nodes:
+This project provides a demo for teleoperating a 5-DOF robotic arm. It consists of two primary ROS2 nodes:
 1. **joy_teleop_hiddi (C++):** A high-performance node that interfaces directly with the QNX HIDDI service to read raw data from a connected gamepad. It parses this data and publishes it as standard `/joy` messages.
 2. **ik_solver (C++):** An inverse kinematics solver node using the Orocos
 KDL library's Levenberg-Marquardt (LMA) position solver. It receives
@@ -69,11 +68,8 @@ PCA9685 I²C servo driver at 50Hz with exponential smoothing.
 * **Homing Function:** A dedicated "Home" button on the gamepad smoothly returns the arm to its neutral, upright position.
 * **"Screensaver" Mode:** A toggleable mode that makes the arm perform a continuous, pre-programmed drawing motion (a figure-eight) until the user provides input.
 * **Individual Servo Tuning:** All movement speeds, safe limits, and automated poses are easily configurable in the Python script.
-* **Direct Joystick Mode:** Each joystick axis directly controls the speed
-of a corresponding servo joint.
-* **Inverse Kinematics Mode:** Joystick controls the end effector position
-in Cartesian space (X, Y, Z). The IK solver computes the required joint
-angles automatically.
+* **Direct Joystick Mode:** Each joystick axis directly controls the speed of a corresponding servo joint.
+* **Inverse Kinematics Mode:** Joystick controls the end effector position in Cartesian space (X, Y, Z). The IK solver computes the required joint angles automatically.
 
 ## Hardware Setup
 
@@ -124,44 +120,24 @@ Ensure the servo plugs are oriented correctly. The signal wire (yellow) should b
 
 ## Software Requirements
 
-* **Operating System:** QNX SDP 8.0.
-* **ROS2 Humble:** A full ROS2 Humble installation cross-compiled for QNX `aarch64le` is required. This is a complex process that involves building the port from source. The official build files and instructions are maintained by QNX and available at the link below.
-  * **Official Port:** [QNX ROS2 Build Files](https://github.com/qnx-ports/build-files/tree/main/ports/ros2)
-
-* **Dependencies:** The cross-compiled ROS2 installation must include `rclpy` and `rclcpp`.
+* **Operating System:** QNX SDP 8.0 with APK support.
+* **ROS2 Jazzy:** A full ROS2 Jazzy installation for QNX `aarch64le` is required.
+* **Dependencies:** The ROS2 installation must include `rclpy` and `rclcpp`.
 * **Package Installation:** requires `packages` to run nodes; `pip3 install packaging`.
-
+* **APK Dependencies:** Building requires the following APKs; `sudo apk add ros2-jazzy tinyxml2-dev eigen-dev qnx-screen-dev`
 ***
 ## How to Build
 
-The project is built using `colcon`, the standard ROS2 build tool. A convenience script, `build.sh`, is provided to automate the cross-compilation process for the QNX target.
+The project is built using `colcon` on a self hosted QNX target, the standard ROS2 build tool. A convenience script, `build.sh`, to automate this process.
 
-1.  **Ensure your QNX environment is set up:**
-    ```bash
-    source ~/qnx800/qnxsdp-env.sh
-    ```
-2.  **Run the build script:**
-    From the root of the project directory, make the script executable and run it:
-    ```bash
-    chmod +x build.sh
-    ./build.sh
-    ```
-The script will automatically locate your QNX toolchain and cross-compiled ROS2 installation, then build the `joy_teleop_hiddi` and `arm_controller` packages. The compiled output will be placed in the `install/aarch64le/` directory.
+**Run the build script:**
+From the root of the project directory, make the script executable and run it:
+```bash
+chmod +x build.sh
+./build.sh
+```
 
-***
-
-## How to Transfer
-
-After a successful build, the `transfer.sh` script is used to copy the compiled nodes to your target Raspberry Pi running QNX.
-
-1.  **Configure the Target IP:**
-Open the `transfer.sh` script and set the `TARGET_IP_ADDRESS` variable to your Raspberry Pi's IP address.
-2.  **Run the transfer script:**
-    ```bash
-    chmod +x transfer.sh
-    ./transfer.sh
-    ```
-The script will use `scp` to copy the contents of your `install/aarch64le/` directory to the `/data/home/qnxuser/opt/ros/nodes/` directory on the target device.
+The script will automatically locate your ROS2 installation, then build the projects packages. The compiled output will be placed in the `install/` directory.
 
 ***
 
@@ -170,19 +146,14 @@ The script will use `scp` to copy the contents of your `install/aarch64le/` dire
 
 A launch script, `start_robot.sh`, is provided in the `target_scripts` directory to set up the environment and run both nodes simultaneously on the QNX target.
 
-1.  **Transfer the script:**
-Make sure `start_robot.sh` has been transferred to the QNX target.
-1.  **Make it executable:**
-    On the QNX target, run:
-    ```bash
-    chmod +x start_robot.sh
-    ```
-2.  **Run the demo:**
-    Execute the script with root privileges to grant access to the I²C and HIDDI hardware.
-    ```bash
-    ./start_robot.sh
-    ```
-The script will launch both the `joy_teleop_node` and the `arm_controller_node.py` in the background. You can now control the arm with the joystick. To stop both nodes, press `Ctrl+C` in the terminal where you ran the script.
+```bash
+# Make the target_script executable
+chmod +x ./target_scripts/start_robot.sh
+# Execute the script with root privileges to grant access to the I²C and HIDDI hardware.
+sudo ./target_scripts/start_robot.sh
+```
+
+The script will launch `joy_teleop_node`, `ik_solver` and the `arm_controller_node.py` nodes in the background. You can now control the arm with the joystick. To stop both nodes, press `Ctrl+C` in the terminal where you ran the script.
 
 ***
 
