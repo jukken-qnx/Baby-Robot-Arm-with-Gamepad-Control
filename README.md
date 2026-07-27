@@ -2,7 +2,7 @@
  
 This repository provides a complete ROS2 project for controlling a 6-DOF robotic arm using a standard gamepad controller on the QNX SDP 8.0. The project is designed to run on a Raspberry Pi 4B or Pi 5 and demonstrates real-time, intuitive control over the arm's movements.
 
-![Picture of the Robotic Arm with ping pong balls.](https://github.com/qnx/Baby-Robot-Arm-with-Gamepad-Control/docs/QNX-Robot-Arm-at-CES.jpeg)
+![Picture of the Robotic Arm with ping pong balls.](./docs/QNX-Robot-Arm-at-CES.jpeg)
 
 The project uses the [Arduino-based Robot Arm Model](https://cults3d.com/en/3d-model/various/arduino-based-robot-arm-howtomechatronics) from [How To Mechatronics](https://howtomechatronics.com/) -- check out their website and other models!
 
@@ -62,8 +62,16 @@ angles automatically. Toggle with the B button on the gamepad.
  
 ## Hardware Setup
  
-This project requires a Raspberry Pi 4 to be connected to a PCA9685 16-channel servo driver board. This board is responsible for providing the power and control signals to the six servos of the robot arm.
- 
+This project requires a Raspberry Pi 4 to be connected to a PCA9685 16-channel servo driver board. This board is responsible for providing the power and control signals to the six servos of the robot arm. In all, you'll need:
+
+* 1 x Raspberry Pi 4 or Raspberry Pi 5
+* 1 x 3D printed body parts (see https://cults3d.com/en/3d-model/various/arduino-based-robot-arm-howtomechatronics)
+* 3 x MG996R Servo Motor
+* 3 x SG90 Micro Servo Motor
+* 1 x 5V 6A+ DC Power Supply (and optionally a DC barrel jack breakout receiver)
+* 1 x PCA9685 16-channel servo PWM controller
+* Wiring (servo extension wires, power wires, dupont jumper wires to connect PCA9685 to Raspberry Pi)
+
 The setup involves three main sets of connections:
 1.  **I²C Communication:** A 4-wire connection between the Raspberry Pi and the PCA9685 for sending control commands.
 2.  **Servo Power:** A dedicated, high-current 6V power supply connected directly to the PCA9685 to drive the servos.
