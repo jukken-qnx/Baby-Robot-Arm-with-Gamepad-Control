@@ -127,7 +127,7 @@ class ArmControllerNode(Node):
             self.get_logger().error(f"Failed to initialize ArmController: {e}")
             rclpy.try_shutdown()
             return
-        
+
         ## @brief Publisher for Cartesian velocity commands sent to
         ## the IK solver when in IK mode.
         ## Message format: [X_vel, Y_vel, Z_vel, home_flag]
@@ -203,6 +203,7 @@ class ArmControllerNode(Node):
         msg = String()
         msg.data = mode.name.lower()
         self.mode_publisher.publish(msg)
+        self.active_input.focus()
 
     def _enable_screensaver(self, dance: ScreenSaverDance):
         """

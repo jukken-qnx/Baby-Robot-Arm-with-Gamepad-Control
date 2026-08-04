@@ -28,7 +28,6 @@ The project uses the [Arduino-based Robot Arm Model](https://cults3d.com/en/3d-m
   - [How to Run the Demo](#how-to-run-the-demo)
   - [Configuration \& Tuning](#configuration--tuning)
     - [Manual Calibration](#manual-calibration)
-- [TODO provide photo of idle position](#todo-provide-photo-of-idle-position)
     - [Setting Safe Workspace Limits (`start_robot.sh`)](#setting-safe-workspace-limits-start_robotsh)
       - [Servo Percentage Limits](#servo-percentage-limits)
       - [Cartesian Workspace Limits](#cartesian-workspace-limits)
@@ -161,8 +160,6 @@ The script will launch `joy_teleop_node`, `ik_solver` and the `arm_controller_no
 
 ### Manual Calibration
 After the Baby Robot Arm is fully assembled you will need to calibrate each the servos. The easiest way to calibrate servos is by running the `start_robot.sh` script to startup the demo and press Y to move the robot in the idle position before reinstalling each servo from the bottom up to match the image below. Before and after installing each servo it is important to home the servo by pressing Y to ensure it is in the correct position before moving onto the next one.
-
-# TODO provide photo of idle position
 
 When homed the servos should be in the provided position
 - Base (Servo 0)    - Face towards you.

@@ -68,7 +68,13 @@ class ArmControllerInput:
         '''
         # Not implemented by default.
 
+    def focus(self):
+        '''
+        @brief Called whenever the input mode is moved into focus. This can happen either on state
+        change or if screensaver is turned on than off.
 
+        By default this will be ignored unless function is overridden by child input
+        '''
 
 
 ## --------------------------------------------------------------------------
@@ -347,18 +353,11 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
         super().__init__(controller, logger)
         self.cartesian_pub = cartesian_pub
         self.curr_pos_pub = curr_pos_pub
-        self.last_update = time.time()
 
-    def update(self):
+    def focus(self):
         """
-        Publishes the current position of the arm position
+        Publishes the current position of the arm position on state change back to IK mode
         """
-        # Only publish every 10ms
-        now = time.time()
-        if (now < self.last_update + 0.01):
-            return
-
-        self.last_update = now
         cmd = Float64MultiArray()
         cmd.data = [
             self.controller.get_joint_rad(JointNum.BASE),
@@ -366,13 +365,11 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
             self.controller.get_joint_rad(JointNum.ELBOW),
             self.controller.get_joint_rad(JointNum.WRIST),
             self.controller.get_joint_rad(JointNum.HAND),
-            self.controller.get_joint_rad(JointNum.GRIPPER),
+            0.0
         ]
         self.curr_pos_pub.publish(cmd)
 
-
     def joy_callback(self, msg: Joy):
-
         # --- Joystick Control Logic ---
         cmd = Float64MultiArray()
         cmd.data = [
@@ -400,7 +397,7 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
             data[3]: Joint 3 angle (Wrist Pitch)
             data[4]: Joint 4 angle (Wrist Roll)
         """
-        if len(msg.position) < 1:
+        if len(msg.position) < 5:
             return
 
         self.controller.set_joint_rad(JointNum.BASE, msg.position[0])
