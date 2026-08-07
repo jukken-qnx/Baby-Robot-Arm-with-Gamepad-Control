@@ -1,26 +1,47 @@
 #!/bin/bash
- 
+#
+# Copyright (c) 2026, BlackBerry Limited. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
 # --- Set Environment Variables ---
 # These paths are needed for ROS2 to find its libraries and Python packages.
-export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/data/home/qnxuser/opt/ros/humble/lib"
-export URDF_PATH="$URDF_PATH/data/home/qnxuser/opt/ros/nodes/share/ik_solver/config"
-export PYTHONPATH="$PYTHONPATH:/data/home/qnxuser/opt/ros/humble/usr/lib/python3.11/site-packages/:/data/home/qnxuser/.local/lib/python3.11/site-packages/"
+SCRIPT_DIR=$(dirname "${BASH_SOURCE}")
+
+export LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/opt/ros/jazzy/lib"
+export ROS2_NODES_INSTALL="${SCRIPT_DIR}/../install"
+export URDF_PATH="${ROS2_NODES_INSTALL}/share/ik_solver/config"
+export PYTHONPATH="$PYTHONPATH:/opt/ros/jazzy/usr/lib/python3.11/site-packages/:/data/home/qnxuser/.local/lib/python3.11/site-packages/"
 export COLCON_PYTHON_EXECUTABLE=/system/bin/python3
- 
+
 # --- Sourcing ROS2 ---
 # Source the main ROS2 environment
-if [ -f /data/home/qnxuser/opt/ros/humble/setup.bash ]; then
-    . /data/home/qnxuser/opt/ros/humble/setup.bash
+if [ -f /opt/ros/jazzy/setup.bash ]; then
+    . /opt/ros/jazzy/setup.bash
 else
     echo "Error: ROS2 global setup file not found!"
     exit 1
 fi
- 
+
 # Source your workspace's local setup file to find your custom nodes
-if [ -f /data/home/qnxuser/opt/ros/nodes/local_setup.bash ]; then
-    . /data/home/qnxuser/opt/ros/nodes/local_setup.bash
+if [ -f ${ROS2_NODES_INSTALL}/local_setup.bash ]; then
+    . ${ROS2_NODES_INSTALL}/local_setup.bash
+else
+    echo "Error: ROS2 node install not found! ROS2_NODES_INSTALL=${ROS2_NODES_INSTALL}"
+    exit 1
 fi
- 
+
 # =========================================================================
 # ARM LIMITS MODIFIERS
 # Array order:
@@ -54,9 +75,9 @@ ros2 run arm_controller arm_controller_node.py \
     --ros-args \
     -p servo_min_limits:="${SERVO_MIN_LIMITS}" \
     -p servo_max_limits:="${SERVO_MAX_LIMITS}" &
- 
+
 # --- Wait for all background nodes to exit ---
 echo "All nodes started. Press Ctrl+C in this terminal to stop both."
 wait
- 
+
 echo "All nodes have been shut down. Script finished."

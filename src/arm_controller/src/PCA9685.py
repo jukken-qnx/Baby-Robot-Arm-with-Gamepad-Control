@@ -71,7 +71,7 @@ class PCA9685(object):
         self.address = address
 
         self.set_all_pwm(0, 0)
-        
+
         bus.write_byte_data(self.address, MODE2, OUTDRV | 0x20)
         bus.write_byte_data(self.address, MODE1, ALLCALL)
         time.sleep(0.005) # wait for oscillator
@@ -95,7 +95,7 @@ class PCA9685(object):
             logger.debug('Estimated pre-scale: {0}'.format(prescaleval))
             prescale = int(math.floor(prescaleval + 0.5))
             logger.debug('Final pre-scale: {0}'.format(prescale))
-            
+
             oldmode = bus.read_byte_data(self.address, MODE1)
             newmode = (oldmode & 0x7F) | 0x10    # sleep
             bus.write_byte_data(self.address, MODE1, newmode)  # go to sleep
@@ -107,13 +107,12 @@ class PCA9685(object):
     def set_pwm(self, channel, on, off):
             """
             Sets the on and off time for a specific channel on the PCA9685 PWM controller.
-            
+
             Args:
                 channel (int): The channel number to set the on and off time for.
                 on (int): The value for the on time of the PWM signal.
                 off (int): The value for the off time of the PWM signal.
             """
-            
             bus.write_byte_data(self.address, LED0_ON_L+4*channel, on & 0xFF)
             bus.write_byte_data(self.address, LED0_ON_H+4*channel, on >> 8)
             bus.write_byte_data(self.address, LED0_OFF_L+4*channel, off & 0xFF)
@@ -122,12 +121,11 @@ class PCA9685(object):
     def set_all_pwm(self, on, off):
             """
             Sets the on and off values for all channels of the PCA9685 PWM controller.
-            
+
             Args:
                 on (int): The value to set the on time for all channels.
                 off (int): The value to set the off time for all channels.
             """
-            
             bus.write_byte_data(self.address, ALL_LED_ON_L, on & 0xFF)
             bus.write_byte_data(self.address, ALL_LED_ON_H, on >> 8)
             bus.write_byte_data(self.address, ALL_LED_OFF_L, off & 0xFF)
@@ -136,5 +134,5 @@ class PCA9685(object):
     def software_reset(self):
         """Sends a software reset (SWRST) command to all servo drivers on the bus."""
         #self._device.writeRaw8(0x06)
-        
+
         bus.write_byte_data(self.address, 0x06, 0x00)

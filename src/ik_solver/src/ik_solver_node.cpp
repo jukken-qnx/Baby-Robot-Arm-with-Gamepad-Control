@@ -329,6 +329,7 @@ void IKSolverNode::cartesian_callback(const std_msgs::msg::Float64MultiArray::Sh
       current_joint_positions_(i) = 0.0;
     }
     fk_solver_->JntToCart(current_joint_positions_, cartesian_target_);
+    publish_joint_command(current_joint_positions_);
     return;
   }
 
