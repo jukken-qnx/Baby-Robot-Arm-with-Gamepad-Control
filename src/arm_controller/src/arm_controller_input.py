@@ -371,14 +371,23 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
 
     def joy_callback(self, msg: Joy):
         # --- Joystick Control Logic ---
-        cmd = Float64MultiArray()
-        cmd.data = [
-            -msg.axes[GamepadAxis.X.value],
-            msg.axes[GamepadAxis.Y.value],
-            msg.axes[GamepadAxis.RY.value],
-            float(msg.buttons[GamepadButton.Y.value]) # data[3]: home button
-        ]
-        self.cartesian_pub.publish(cmd)
+        cartesian_input = (
+            msg.axes[GamepadAxis.X.value] != 0.0
+            or msg.axes[GamepadAxis.Y.value] != 0.0
+            or msg.axes[GamepadAxis.RY.value] != 0.0
+            or msg.buttons[GamepadButton.Y.value] == 1
+        )
+
+        # A gripper-only button press must not trigger another IK solve.
+        if cartesian_input:
+            cmd = Float64MultiArray()
+            cmd.data = [
+                -msg.axes[GamepadAxis.X.value],
+                msg.axes[GamepadAxis.Y.value],
+                msg.axes[GamepadAxis.RY.value],
+                float(msg.buttons[GamepadButton.Y.value]) # data[3]: home button
+            ]
+            self.cartesian_pub.publish(cmd)
 
         # Gripper Logic: Shoulders OR Stick Clicks
         if msg.buttons[GamepadButton.L1.value] == 1 or msg.buttons[GamepadButton.L3.value] == 1:
@@ -405,4 +414,3 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
         self.controller.set_joint_rad(JointNum.ELBOW, msg.position[2])
         self.controller.set_joint_rad(JointNum.WRIST, msg.position[3])
         self.controller.set_joint_rad(JointNum.HAND, msg.position[4])
-

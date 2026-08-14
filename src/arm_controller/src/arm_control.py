@@ -225,9 +225,10 @@ class ArmController:
         self.last_input_time = time.time()
         self.servos_are_released = False
 
-        # Clamp the result to the servo max and min only if limits are enabled
-        if (self._limits_enabled):
-                abs_pos = min(max(abs_pos, joint.min_pos), joint.max_pos)
+        # The gripper always keeps its safety limits. IK may manage the limits
+        # of the other five joints itself.
+        if self._limits_enabled or joint_num == JointNum.GRIPPER:
+            abs_pos = min(max(abs_pos, joint.min_pos), joint.max_pos)
 
         joint.target = abs_pos
         return joint.target
