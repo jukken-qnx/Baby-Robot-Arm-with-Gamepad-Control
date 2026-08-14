@@ -283,6 +283,14 @@ class ArmController:
         for joint in self._joints:
             self.set_joint(joint.joint, joint.center)
 
+    def center_ortn_servos(self):
+        """
+        @brief centers orientation servos, respecting the safe limits.
+        """
+        for joint in self._joints:
+            if joint.joint in [JointNum.WRIST, JointNum.HAND, JointNum.GRIPPER]:
+                self.set_joint(joint.joint, joint.center)   
+
     def release_all_servos(self):
         """
         @brief Fully disables PWM signals to all servos, allowing them to go limp.

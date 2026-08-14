@@ -35,7 +35,7 @@ IKSolverNode::IKSolverNode() : Node("ik_solver_node") {
 
   this->declare_parameter<std::string>("urdf_file", "arm5dof.urdf");
   this->declare_parameter<std::string>("base_link", "world");
-  this->declare_parameter<std::string>("end_effector_link", "Gripper_Assembly_1");
+  this->declare_parameter<std::string>("end_effector_link", "Arm_03_1");
   this->declare_parameter<double>("update_rate", 50.0);
   this->declare_parameter<double>("velocity_scale", 0.1);
 

@@ -388,6 +388,14 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
                 float(msg.buttons[GamepadButton.Y.value]) # data[3]: home button
             ]
             self.cartesian_pub.publish(cmd)
+        
+        if msg.buttons[GamepadButton.Y.value] == 1:
+            self.get_logger().info("Home button pressed. Setting target to safe center.")
+            self.controller.center_ortn_servos()
+            return
+
+        self.controller.move_joint(JointNum.WRIST, msg.axes[GamepadAxis.DX.value])
+        self.controller.move_joint(JointNum.HAND, -1 * msg.axes[GamepadAxis.RX.value])
 
         # Gripper Logic: Shoulders OR Stick Clicks
         if msg.buttons[GamepadButton.L1.value] == 1 or msg.buttons[GamepadButton.L3.value] == 1:
@@ -406,11 +414,9 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
             data[3]: Joint 3 angle (Wrist Pitch)
             data[4]: Joint 4 angle (Wrist Roll)
         """
-        if len(msg.position) < 5:
+        if len(msg.position) < 3:
             return
 
         self.controller.set_joint_rad(JointNum.BASE, msg.position[0])
         self.controller.set_joint_rad(JointNum.SHOULDER, msg.position[1])
         self.controller.set_joint_rad(JointNum.ELBOW, msg.position[2])
-        self.controller.set_joint_rad(JointNum.WRIST, msg.position[3])
-        self.controller.set_joint_rad(JointNum.HAND, msg.position[4])

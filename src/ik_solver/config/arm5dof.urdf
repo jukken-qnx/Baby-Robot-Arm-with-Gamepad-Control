@@ -160,7 +160,7 @@
     <axis xyz="0 0 1"/>
     <limit effort="1" velocity="1" lower="-2.356" upper="2.356"/>
   </joint>
-  <joint name="dof_joint04" type="revolute">
+  <joint name="dof_joint04" type="fixed">
     <origin xyz="0.08975 0.0053 0.0075" rpy="-1.5707963 0 -1.5707963"/>
     <parent link="Arm_02_v3_1"/>
     <child link="Arm_03_1"/>
