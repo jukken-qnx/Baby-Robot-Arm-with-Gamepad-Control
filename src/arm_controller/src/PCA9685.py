@@ -142,13 +142,11 @@ class PCA9685(object):
         This avoids transient PWM values that can occur when the four
         ALL_LED registers are updated in separate I2C transactions.
         """
-        off_high = bus.read_byte_data(self.address, ALL_LED_OFF_H)
-        bus.write_byte_data(self.address, ALL_LED_OFF_H, off_high | FULL_OFF)
+        bus.write_byte_data(self.address, ALL_LED_OFF_H, FULL_OFF)
 
     def enable_all_pwm(self):
         """Clears the ALL_LED full-off bit, enabling the channel outputs."""
-        off_high = bus.read_byte_data(self.address, ALL_LED_OFF_H)
-        bus.write_byte_data(self.address, ALL_LED_OFF_H, off_high & ~FULL_OFF)
+        bus.write_byte_data(self.address, ALL_LED_OFF_H, 0x00)
 
     def software_reset(self):
         """Sends a software reset (SWRST) command to all servo drivers on the bus."""
