@@ -369,6 +369,13 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
         ]
         self.curr_pos_pub.publish(cmd)
 
+    def center_ortn_servos(self):
+        """
+        @brief centers orientation servos, respecting the safe limits.
+        """
+        for joint in [JointNum.WRIST, JointNum.HAND, JointNum.GRIPPER]:
+            self.controller.center_joint(joint)
+
     def joy_callback(self, msg: Joy):
         # --- Joystick Control Logic ---
         cartesian_input = (
@@ -391,7 +398,7 @@ class ArmControllerInverseKinematicInput(ArmControllerInput):
         
         if msg.buttons[GamepadButton.Y.value] == 1:
             self.get_logger().info("Home button pressed. Setting target to safe center.")
-            self.controller.center_ortn_servos()
+            self.center_ortn_servos()
             return
 
         self.controller.move_joint(JointNum.WRIST, msg.axes[GamepadAxis.DX.value])

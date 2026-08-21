@@ -283,13 +283,12 @@ class ArmController:
         for joint in self._joints:
             self.set_joint(joint.joint, joint.center)
 
-    def center_ortn_servos(self):
+    def center_joint(self, joint_num: JointNum) -> float:
         """
-        @brief centers orientation servos, respecting the safe limits.
+        @brief centers a specific joint, respecting the safe limits.
         """
-        for joint in self._joints:
-            if joint.joint in [JointNum.WRIST, JointNum.HAND, JointNum.GRIPPER]:
-                self.set_joint(joint.joint, joint.center)   
+        joint = self._joints[joint_num.value]
+        return self.set_joint(joint_num, joint.center)
 
     def release_all_servos(self):
         """
