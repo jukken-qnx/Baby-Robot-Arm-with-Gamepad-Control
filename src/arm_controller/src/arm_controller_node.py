@@ -52,11 +52,12 @@ Key Features:
 
 from arm_control import ArmController
 from arm_controller_input import (
+    ArmControllerIKJointInput,
     GamepadButton,
     ArmControllerJoystickInput,
     ArmControllerScreensaverInput,
     ArmControllerJointInput,
-    ArmControllerInverseKinematicInput,
+    ArmControllerIKJoystickInput,
     ScreenSaverDance,
 )
 from enum import Enum
@@ -66,10 +67,8 @@ from rclpy.node import Node
 from std_msgs.msg import Float64MultiArray
 from sensor_msgs.msg import Joy, JointState
 from std_msgs.msg import String
-from PCA9685 import PCA9685
 import time
 import math
-import numpy as np
 import signal
 
 
@@ -89,10 +88,11 @@ class ArmControlMode(Enum):
     What the robot arm is being controlled.
     """
 
-    JOYSTICK = 0  # Controlled using the gamepad controller published on /joy
-    JOINT = 1  # Controlled directly using joint angles published on /mov
-    IK = 2  # Controlled by Joystick using Inverse kinematic (not yet supported)
-    MAX = IK
+    JOYSTICK = 0   # Controlled using the gamepad controller published on /joy
+    JOINT = 1      # Controlled directly using joint angles published on /joint
+    IK_JOYSTICK = 2 # Controlled by Joystick using Inverse kinematic
+    IK_JOINT = 3    # Controlled by external input using IK and directory joints on /joint and /mov
+    MAX = IK_JOINT
 
 
 class ArmControllerNode(Node):
@@ -156,7 +156,8 @@ class ArmControllerNode(Node):
         self.input_joystick = ArmControllerJoystickInput(self.controller, self.get_logger())
         self.input_screensaver = ArmControllerScreensaverInput(self.controller, self.get_logger())
         self.input_joint = ArmControllerJointInput(self.controller, self.get_logger())
-        self.input_ik = ArmControllerInverseKinematicInput(self.controller, self.get_logger(), self.cartesian_pub, self.curr_pos_pub)
+        self.input_ik_joy = ArmControllerIKJoystickInput(self.controller, self.get_logger(), self.cartesian_pub, self.curr_pos_pub)
+        self.input_ik_joint = ArmControllerIKJointInput(self.controller, self.get_logger(), self.curr_pos_pub)
         self.active_input = self.input_joystick # By default the joystick input will be used
 
         # The default mode is the joystick controls. Force the update to publish the state at least one at start
@@ -196,8 +197,11 @@ class ArmControllerNode(Node):
                 self.active_input = self.input_joystick
             case ArmControlMode.JOINT:
                 self.active_input = self.input_joint
-            case ArmControlMode.IK:
-                self.active_input = self.input_ik
+            case ArmControlMode.IK_JOYSTICK:
+                self.active_input = self.input_ik_joy
+                self.controller.enable_position_limits(False)
+            case ArmControlMode.IK_JOINT:
+                self.active_input = self.input_ik_joint
                 self.controller.enable_position_limits(False)
 
         msg = String()
@@ -248,9 +252,11 @@ class ArmControllerNode(Node):
             if msg.buttons[GamepadButton.A.value]:
                 self._update_mode(ArmControlMode.JOYSTICK)
             elif msg.buttons[GamepadButton.B.value]:
-                self._update_mode(ArmControlMode.IK)
+                self._update_mode(ArmControlMode.IK_JOYSTICK)
             elif msg.buttons[GamepadButton.X.value]:
                 self._update_mode(ArmControlMode.JOINT)
+            elif msg.buttons[GamepadButton.Y.value]:
+                self._update_mode(ArmControlMode.IK_JOINT)
             if prev_mode != self.control_mode:
                 self.get_logger().info(f"Info switching to mode: {self.control_mode.name}")
             return
