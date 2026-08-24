@@ -115,6 +115,7 @@ class ArmControllerNode(Node):
         # Declare parameters with default 0.0 to 100.0 boundaries
         self.declare_parameter("servo_min_limits", [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
         self.declare_parameter("servo_max_limits", [100.0, 100.0, 100.0, 100.0, 100.0, 100.0])
+        self.declare_parameter("mode", "joystick")
 
         self.controller = None
         try:
@@ -162,8 +163,23 @@ class ArmControllerNode(Node):
 
         # The default mode is the joystick controls. Force the update to publish the state at least one at start
         self.control_mode = ArmControlMode.JOYSTICK
+        default_mode = self.get_parameter("mode").value.lower()
+        match default_mode:
+            case "joystick":
+                self.control_mode = ArmControlMode.JOYSTICK
+            case "joint":
+                self.control_mode = ArmControlMode.JOINT
+            case "ik_joint":
+                self.control_mode = ArmControlMode.IK_JOINT
+            case "ik_joystick":
+                self.control_mode = ArmControlMode.IK_JOYSTICK
+            case _:
+                self.get_logger().error(f"Invalid mode argument {default_mode}")
+                rclpy.try_shutdown()
+                return
+
         self.screensaver_enabled = False
-        self._update_mode(ArmControlMode.JOYSTICK, force=True)
+        self._update_mode(self.control_mode, force=True)
 
         self.get_logger().info("Centering arm on startup...")
         self.controller.center_all_servos()
