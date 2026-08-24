@@ -64,8 +64,8 @@ class Joint:
         [602, 1012],  # Servo 0: Base
         [602, 1012],  # Servo 1: Shoulder
         [602, 1012],  # Servo 2: Elbow
-        [705, 910],  # Servo 3: Wrist Pitch
-        [705, 910],  # Servo 4: Wrist Roll
+        [602, 1012],  # Servo 3: Wrist Pitch
+        [602, 1012],  # Servo 4: Wrist Roll
         [620, 930],  # Servo 5: Gripper
     ]
 
@@ -229,6 +229,8 @@ class ArmController:
         # of the other five joints itself.
         if self._limits_enabled or joint_num == JointNum.GRIPPER:
             abs_pos = min(max(abs_pos, joint.min_pos), joint.max_pos)
+        else:
+            abs_pos = min(max(abs_pos, 0.0), 100.0)
 
         joint.target = abs_pos
         return joint.target
