@@ -64,8 +64,8 @@ class Joint:
         [602, 1012],  # Servo 0: Base
         [602, 1012],  # Servo 1: Shoulder
         [602, 1012],  # Servo 2: Elbow
-        [705, 910],  # Servo 3: Wrist Pitch
-        [705, 910],  # Servo 4: Wrist Roll
+        [602, 1012],  # Servo 3: Wrist Pitch
+        [602, 1012],  # Servo 4: Wrist Roll
         [620, 930],  # Servo 5: Gripper
     ]
 
@@ -147,6 +147,9 @@ class ArmController:
         self.get_logger().info(f"Loaded MAX limits: {servo_max_limits}")
 
         self.servos_are_released = False
+        # PCA9685 starts with global FULL_OFF set. The first update preloads
+        # every channel before enabling the outputs.
+        self.pwm_outputs_enabled = False
         self.last_input_time = time.time()
 
         # If min and max limits for servo positions is enabled.
@@ -184,6 +187,11 @@ class ArmController:
             if new_percent is not None:
                 self._set_percent(joint, new_percent)
 
+        # All channel values are now valid, so it is safe to enable output.
+        if not self.pwm_outputs_enabled:
+            self.pwm.enable_all_pwm()
+            self.pwm_outputs_enabled = True
+
     def move_joint(self, joint_num: JointNum, delta: float) -> float:
         """
         @brief Moves a servo based on it's current location.
@@ -217,9 +225,12 @@ class ArmController:
         self.last_input_time = time.time()
         self.servos_are_released = False
 
-        # Clamp the result to the servo max and min only if limits are enabled
-        if (self._limits_enabled):
-                abs_pos = min(max(abs_pos, joint.min_pos), joint.max_pos)
+        # The gripper always keeps its safety limits. IK may manage the limits
+        # of the other five joints itself.
+        if self._limits_enabled or joint_num == JointNum.GRIPPER:
+            abs_pos = min(max(abs_pos, joint.min_pos), joint.max_pos)
+        else:
+            abs_pos = min(max(abs_pos, 0.0), 100.0)
 
         joint.target = abs_pos
         return joint.target
@@ -274,13 +285,24 @@ class ArmController:
         for joint in self._joints:
             self.set_joint(joint.joint, joint.center)
 
+    def center_joint(self, joint_num: JointNum) -> float:
+        """
+        @brief centers a specific joint, respecting the safe limits.
+        """
+        joint = self._joints[joint_num.value]
+        return self.set_joint(joint_num, joint.center)
+
     def release_all_servos(self):
         """
-        @brief Turns off PWM signals to all servos, allowing them to go limp.
+        @brief Fully disables PWM signals to all servos, allowing them to go limp.
+
+        The target and current positions remain unchanged so normal control can
+        resume from the last commanded state when new input is received.
         """
         self.get_logger().info("Releasing all servos (turning off PWM).")
         self.servos_are_released = True
-        self.pwm.set_all_pwm(0, 0)
+        self.pwm.disable_all_pwm()
+        self.pwm_outputs_enabled = False
 
     def is_servos_centered(self):
         """

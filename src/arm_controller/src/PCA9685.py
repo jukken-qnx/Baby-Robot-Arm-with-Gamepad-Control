@@ -49,6 +49,7 @@ SLEEP              = 0x10
 ALLCALL            = 0x01
 INVRT              = 0x10
 OUTDRV             = 0x04
+FULL_OFF           = 0x10
 
 bus = smbus.SMBus(SMBUS_INTERFACE)
 
@@ -70,7 +71,10 @@ class PCA9685(object):
         self.interface = interface
         self.address = address
 
-        self.set_all_pwm(0, 0)
+        # Disable every channel with one register write. Rewriting all four
+        # ALL_LED registers separately can briefly expose intermediate PWM
+        # values before the full-off bit is set.
+        self.disable_all_pwm()
 
         bus.write_byte_data(self.address, MODE2, OUTDRV | 0x20)
         bus.write_byte_data(self.address, MODE1, ALLCALL)
@@ -130,6 +134,19 @@ class PCA9685(object):
             bus.write_byte_data(self.address, ALL_LED_ON_H, on >> 8)
             bus.write_byte_data(self.address, ALL_LED_OFF_L, off & 0xFF)
             bus.write_byte_data(self.address, ALL_LED_OFF_H, off >> 8)
+
+    def disable_all_pwm(self):
+        """
+        Sets the ALL_LED full-off bit using a single register write.
+
+        This avoids transient PWM values that can occur when the four
+        ALL_LED registers are updated in separate I2C transactions.
+        """
+        bus.write_byte_data(self.address, ALL_LED_OFF_H, FULL_OFF)
+
+    def enable_all_pwm(self):
+        """Clears the ALL_LED full-off bit, enabling the channel outputs."""
+        bus.write_byte_data(self.address, ALL_LED_OFF_H, 0x00)
 
     def software_reset(self):
         """Sends a software reset (SWRST) command to all servo drivers on the bus."""
